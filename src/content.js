@@ -6,11 +6,12 @@ export const profile = {
   location: "Available worldwide",
   mediums: ["Images", "Writing", "Projects"],
   navigation: [
-    { label: "Home", href: "#home" },
-    { label: "Index", href: "#index" },
-    { label: "Works", href: "#works" },
-    { label: "Notes", href: "#notes" },
-    { label: "About", href: "#about" }
+    { labelKey: "navHome", href: "#home" },
+    { labelKey: "navIndex", href: "#index" },
+    { labelKey: "navWorks", href: "#works" },
+    { labelKey: "navNotes", href: "#notes" },
+    { labelKey: "navAbout", href: "#about" },
+    { labelKey: "navOwner", href: "#owner" }
   ],
   social: [
     { label: "Instagram", href: "https://instagram.com/" },

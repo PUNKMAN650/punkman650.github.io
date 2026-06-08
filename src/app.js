@@ -1,9 +1,21 @@
 import { filterEntriesByKind, getEntryBySlug, getLatestEntries, sortEntriesNewestFirst } from "./archive.js";
 import { entries, profile } from "./content.js";
+import {
+  dictionary,
+  getInitialLanguage,
+  languageLabels,
+  translateEntryType,
+  translateMedium
+} from "./i18n.js";
 
 const app = document.querySelector("#app");
 let activeFilter = "All";
 let activeSlug = null;
+let language = getInitialLanguage();
+
+function t() {
+  return dictionary[language];
+}
 
 function escapeHtml(value) {
   return String(value)
@@ -14,35 +26,51 @@ function escapeHtml(value) {
 }
 
 function renderHeader() {
+  const copy = t();
   const links = profile.navigation
-    .map((item) => `<a href="${item.href}">${item.label}</a>`)
+    .map((item) => `<a href="${item.href}">${copy[item.labelKey]}</a>`)
     .join("");
 
   return `
     <header class="site-header">
       <button class="wordmark" type="button" data-home>${profile.shortName}</button>
       <nav aria-label="Primary navigation">${links}</nav>
+      <div class="language-switcher" aria-label="${copy.languageLabel}">
+        ${Object.keys(languageLabels)
+          .map(
+            (key) => `
+              <button
+                type="button"
+                data-language="${key}"
+                aria-pressed="${language === key}"
+                class="${language === key ? "active" : ""}"
+              >${languageLabels[key]}</button>
+            `
+          )
+          .join("")}
+      </div>
     </header>
   `;
 }
 
 function renderHero() {
+  const copy = t();
   return `
     <section class="folio-hero" id="home">
       <div class="folio-title">
-        <p class="folio-kicker">Visual Notes</p>
+        <p class="folio-kicker">${copy.visualNotes}</p>
         <h1>${profile.name}</h1>
       </div>
       <aside class="folio-meta" aria-label="Site metadata">
         <dl>
-          <div><dt>Year</dt><dd>${profile.year}</dd></div>
-          <div><dt>Mediums</dt><dd>${profile.mediums.join(" / ")}</dd></div>
-          <div><dt>Status</dt><dd>${profile.location}</dd></div>
+          <div><dt>${copy.year}</dt><dd>${profile.year}</dd></div>
+          <div><dt>${copy.mediums}</dt><dd>${copy.images} / ${copy.writing} / ${copy.projects}</dd></div>
+          <div><dt>${copy.status}</dt><dd>${profile.location}</dd></div>
         </dl>
         <ol>
-          <li>Latest entries</li>
-          <li>Archive index</li>
-          <li>Works and notes</li>
+          <li>${copy.latestEntries}</li>
+          <li>${copy.archiveIndex}</li>
+          <li>${copy.worksAndNotes}</li>
         </ol>
       </aside>
     </section>
@@ -50,13 +78,14 @@ function renderHero() {
 }
 
 function renderLatest() {
+  const copy = t();
   const rows = getLatestEntries(entries, 5)
     .map(
       (entry) => `
         <button class="latest-row" type="button" data-entry="${entry.slug}">
           <span>${entry.date}</span>
           <strong>${escapeHtml(entry.title)}</strong>
-          <span>${entry.type}</span>
+          <span>${translateEntryType(entry.type, copy)}</span>
         </button>
       `
     )
@@ -65,8 +94,8 @@ function renderLatest() {
   return `
     <section class="section latest-section" aria-labelledby="latest-heading">
       <div class="section-heading">
-        <p>Latest</p>
-        <h2 id="latest-heading">Recent records</h2>
+        <p>${copy.latest}</p>
+        <h2 id="latest-heading">${copy.recentRecords}</h2>
       </div>
       <div class="latest-list">${rows}</div>
     </section>
@@ -74,6 +103,13 @@ function renderLatest() {
 }
 
 function renderArchive() {
+  const copy = t();
+  const filterLabels = {
+    All: copy.all,
+    Images: copy.images,
+    Writing: copy.writing,
+    Projects: copy.projects
+  };
   const filters = ["All", "Images", "Writing", "Projects"]
     .map(
       (filter) => `
@@ -82,7 +118,7 @@ function renderArchive() {
           data-filter="${filter}"
           aria-pressed="${activeFilter === filter}"
           class="${activeFilter === filter ? "active" : ""}"
-        >${filter}</button>
+        >${filterLabels[filter]}</button>
       `
     )
     .join("");
@@ -92,9 +128,9 @@ function renderArchive() {
       (entry) => `
         <button class="archive-row" type="button" data-entry="${entry.slug}">
           <span>${entry.date}</span>
-          <span>${entry.type}</span>
+          <span>${translateEntryType(entry.type, copy)}</span>
           <strong>${escapeHtml(entry.title)}</strong>
-          <span>${entry.medium}</span>
+          <span>${translateMedium(entry.medium, copy)}</span>
           <span>${entry.tags.map(escapeHtml).join(", ")}</span>
         </button>
       `
@@ -105,18 +141,18 @@ function renderArchive() {
     <section class="section archive-section" id="index" aria-labelledby="archive-heading">
       <div class="section-heading split">
         <div>
-          <p>Archive Index</p>
-          <h2 id="archive-heading">Date-level index</h2>
+          <p>${copy.archiveIndex}</p>
+          <h2 id="archive-heading">${copy.dateLevelIndex}</h2>
         </div>
-        <div class="filter-group" aria-label="Archive filters">${filters}</div>
+        <div class="filter-group" aria-label="${copy.archiveFilters}">${filters}</div>
       </div>
-      <div class="archive-table" role="table" aria-label="Archive entries">
+      <div class="archive-table" role="table" aria-label="${copy.archiveEntries}">
         <div class="archive-row archive-head" role="row">
-          <span>Date</span>
-          <span>Type</span>
-          <span>Title</span>
-          <span>Medium</span>
-          <span>Tags</span>
+          <span>${copy.date}</span>
+          <span>${copy.type}</span>
+          <span>${copy.title}</span>
+          <span>${copy.medium}</span>
+          <span>${copy.tags}</span>
         </div>
         ${rows}
       </div>
@@ -125,21 +161,23 @@ function renderArchive() {
 }
 
 function renderEntryPreview(entry) {
+  const copy = t();
   const image = entry.image ? `<img alt="" src="${entry.image}" />` : "";
   return `
     <article class="entry-preview">
       ${image}
       <div>
-        <p>${entry.date} / ${entry.medium}</p>
+        <p>${entry.date} / ${translateMedium(entry.medium, copy)}</p>
         <h3>${escapeHtml(entry.title)}</h3>
         ${entry.excerpt ? `<p>${escapeHtml(entry.excerpt)}</p>` : ""}
-        <button type="button" data-entry="${entry.slug}">View entry</button>
+        <button type="button" data-entry="${entry.slug}">${copy.viewEntry}</button>
       </div>
     </article>
   `;
 }
 
 function renderWorks() {
+  const copy = t();
   const works = entries
     .filter((entry) => entry.type === "Image" || entry.type === "Project")
     .map(renderEntryPreview)
@@ -148,8 +186,8 @@ function renderWorks() {
   return `
     <section class="section" id="works" aria-labelledby="works-heading">
       <div class="section-heading">
-        <p>Works</p>
-        <h2 id="works-heading">Image-led records</h2>
+        <p>${copy.works}</p>
+        <h2 id="works-heading">${copy.imageLedRecords}</h2>
       </div>
       <div class="preview-grid">${works}</div>
     </section>
@@ -157,6 +195,7 @@ function renderWorks() {
 }
 
 function renderNotes() {
+  const copy = t();
   const notes = entries
     .filter((entry) => entry.type === "Note")
     .map(renderEntryPreview)
@@ -165,8 +204,8 @@ function renderNotes() {
   return `
     <section class="section" id="notes" aria-labelledby="notes-heading">
       <div class="section-heading">
-        <p>Notes</p>
-        <h2 id="notes-heading">Written observations</h2>
+        <p>${copy.notes}</p>
+        <h2 id="notes-heading">${copy.writtenObservations}</h2>
       </div>
       <div class="notes-list">${notes}</div>
     </section>
@@ -174,6 +213,7 @@ function renderNotes() {
 }
 
 function renderAbout() {
+  const copy = t();
   const social = profile.social
     .map((item) => `<a href="${item.href}">${item.label}</a>`)
     .join("");
@@ -181,28 +221,70 @@ function renderAbout() {
   return `
     <section class="section about-section" id="about" aria-labelledby="about-heading">
       <div class="section-heading">
-        <p>About</p>
-        <h2 id="about-heading">A quiet index of images, writing, and project fragments.</h2>
+        <p>${copy.about}</p>
+        <h2 id="about-heading">${copy.aboutTitle}</h2>
       </div>
-      <p>
-        ESTWEN BRENCH / Visual Notes collects visual studies, written observations, and small systems
-        for looking. The site is structured as a living archive rather than a fixed portfolio.
-      </p>
+      <p>${copy.aboutBody}</p>
       <div class="social-links">${social}</div>
     </section>
   `;
 }
 
+function renderOwnerGuide() {
+  const copy = t();
+  const steps = [
+    [copy.ownerStep1Title, copy.ownerStep1Body],
+    [copy.ownerStep2Title, copy.ownerStep2Body],
+    [copy.ownerStep3Title, copy.ownerStep3Body],
+    [copy.ownerUpgradeTitle, copy.ownerUpgradeBody]
+  ]
+    .map(
+      ([title, body], index) => `
+        <li>
+          <span>${String(index + 1).padStart(2, "0")}</span>
+          <div>
+            <h3>${title}</h3>
+            <p>${body}</p>
+          </div>
+        </li>
+      `
+    )
+    .join("");
+
+  return `
+    <section class="section owner-section" id="owner" aria-labelledby="owner-heading">
+      <div class="section-heading">
+        <p>${copy.owner}</p>
+        <h2 id="owner-heading">${copy.ownerTitle}</h2>
+      </div>
+      <p>${copy.ownerBody}</p>
+      <ol class="owner-steps">${steps}</ol>
+      <pre class="content-template"><code>{
+  date: "2026.06.11",
+  type: "Note",
+  title: "Your new title",
+  medium: "Writing",
+  tags: ["tag-one", "tag-two"],
+  slug: "your-new-title",
+  excerpt: "Short summary shown in lists.",
+  image: "assets/your-image.jpg",
+  body: ["First paragraph.", "Second paragraph."]
+}</code></pre>
+    </section>
+  `;
+}
+
 function renderEntryPage(entry) {
+  const copy = t();
   const image = entry.image ? `<img alt="" src="${entry.image}" />` : "";
   const body = entry.body.map((paragraph) => `<p>${escapeHtml(paragraph)}</p>`).join("");
 
   return `
     ${renderHeader()}
     <article class="entry-page">
-      <button class="back-link" type="button" data-back>Back to index</button>
+      <button class="back-link" type="button" data-back>${copy.backToIndex}</button>
       <header>
-        <p>${entry.date} / ${entry.type} / ${entry.medium}</p>
+        <p>${entry.date} / ${translateEntryType(entry.type, copy)} / ${translateMedium(entry.medium, copy)}</p>
         <h1>${escapeHtml(entry.title)}</h1>
         ${entry.excerpt ? `<p>${escapeHtml(entry.excerpt)}</p>` : ""}
       </header>
@@ -221,10 +303,19 @@ function renderHome() {
     ${renderWorks()}
     ${renderNotes()}
     ${renderAbout()}
+    ${renderOwnerGuide()}
   `;
 }
 
 function bindEvents() {
+  document.querySelectorAll("[data-language]").forEach((button) => {
+    button.addEventListener("click", () => {
+      language = button.dataset.language;
+      localStorage.setItem("visual-notes-language", language);
+      render();
+    });
+  });
+
   document.querySelectorAll("[data-filter]").forEach((button) => {
     button.addEventListener("click", () => {
       activeFilter = button.dataset.filter;

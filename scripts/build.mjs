@@ -9,6 +9,7 @@ const requiredFiles = [
   "src/app.js",
   "src/archive.js",
   "src/content.js",
+  "src/i18n.js",
   "src/styles.css"
 ];
 

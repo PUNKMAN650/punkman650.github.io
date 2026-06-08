@@ -7,6 +7,6 @@
     "dev": "node scripts/dev-server.mjs",
     "build": "node scripts/build.mjs",
     "preview": "node scripts/dev-server.mjs dist",
-    "test": "node --test src/archive.test.mjs"
+    "test": "node --test src/archive.test.mjs src/i18n.test.mjs"
   }
 }
