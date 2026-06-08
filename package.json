@@ -1,0 +1,12 @@
+{
+  "name": "estwen-brench-visual-notes",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "node scripts/dev-server.mjs",
+    "build": "node scripts/build.mjs",
+    "preview": "node scripts/dev-server.mjs dist",
+    "test": "node --test src/archive.test.mjs"
+  }
+}
