@@ -1,5 +1,7 @@
 # ESTWEN BRENCH / Visual Notes
 
+我的个人网站。
+
 An editorial personal creator website for images, writing, and project fragments.
 
 ## Stack
