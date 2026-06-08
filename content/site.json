@@ -1,0 +1,94 @@
+{
+  "profile": {
+    "name": "ESTWEN BRENCH / Visual Notes",
+    "shortName": "ESTWEN BRENCH",
+    "year": "2026",
+    "description": "Images, writing, and project fragments from an independent visual creator.",
+    "location": "Available worldwide",
+    "mediums": ["Images", "Writing", "Projects"],
+    "navigation": [
+      { "labelKey": "navHome", "href": "#home" },
+      { "labelKey": "navIndex", "href": "#index" },
+      { "labelKey": "navWorks", "href": "#works" },
+      { "labelKey": "navNotes", "href": "#notes" },
+      { "labelKey": "navAbout", "href": "#about" }
+    ],
+    "social": [
+      { "label": "Instagram", "href": "https://instagram.com/" },
+      { "label": "Substack", "href": "https://substack.com/" },
+      { "label": "Email", "href": "mailto:hello@example.com" }
+    ]
+  },
+  "entries": [
+    {
+      "date": "2026.06.10",
+      "type": "Note",
+      "title": "Fragments after rain",
+      "medium": "Writing",
+      "tags": ["journal", "city"],
+      "slug": "fragments-after-rain",
+      "excerpt": "A short note on wet pavement, quiet windows, and the patience of looking.",
+      "featured": true,
+      "body": [
+        "The city gets quieter after rain, but not because it has less to say.",
+        "Surfaces become more precise. A window stops being a window and becomes a second page."
+      ]
+    },
+    {
+      "date": "2026.06.09",
+      "type": "Image",
+      "title": "Window Study 01",
+      "medium": "Photography",
+      "tags": ["light", "interior"],
+      "slug": "window-study-01",
+      "excerpt": "A muted image study on glass, reflection, and interior light.",
+      "image": "https://images.unsplash.com/photo-1494526585095-c41746248156?auto=format&fit=crop&w=1400&q=80",
+      "featured": true,
+      "body": [
+        "A narrow study of daylight crossing a domestic frame.",
+        "The image belongs to a larger sequence about interior thresholds."
+      ]
+    },
+    {
+      "date": "2026.06.08",
+      "type": "Note",
+      "title": "On quiet interfaces",
+      "medium": "Writing",
+      "tags": ["design", "restraint"],
+      "slug": "on-quiet-interfaces",
+      "excerpt": "A short observation on restraint, rhythm, and the surfaces we return to.",
+      "featured": true,
+      "body": [
+        "A quiet interface is not empty. It is edited.",
+        "The work is in deciding which signals deserve to remain visible."
+      ]
+    },
+    {
+      "date": "2026.05.21",
+      "type": "Project",
+      "title": "Field Index",
+      "medium": "Mixed",
+      "tags": ["archive", "system"],
+      "slug": "field-index",
+      "excerpt": "A small indexing system for visual fragments and written observations.",
+      "body": [
+        "Field Index collects fragments by date, medium, and recurring visual concerns.",
+        "It treats images and notes as equal records."
+      ]
+    },
+    {
+      "date": "2026.04.14",
+      "type": "Image",
+      "title": "Pale Wall Sequence",
+      "medium": "Photography",
+      "tags": ["surface", "silence"],
+      "slug": "pale-wall-sequence",
+      "excerpt": "A quiet sequence of flat light, blank walls, and almost-events.",
+      "image": "https://images.unsplash.com/photo-1518005020951-eccb494ad742?auto=format&fit=crop&w=1400&q=80",
+      "body": [
+        "The sequence studies how much information a pale surface can hold before it becomes a sign.",
+        "Nothing is centered; the frame keeps drifting toward the edge."
+      ]
+    }
+  ]
+}

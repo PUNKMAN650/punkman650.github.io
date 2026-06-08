@@ -4,8 +4,8 @@ import { dictionary, translateEntryType, translateMedium } from "./i18n.js";
 
 describe("i18n", () => {
   it("provides English and Chinese chrome labels", () => {
-    assert.equal(dictionary.en.navOwner, "Owner Guide");
-    assert.equal(dictionary.zh.navOwner, "站主维护");
+    assert.equal(dictionary.en.navWorks, "Works");
+    assert.equal(dictionary.zh.navWorks, "作品");
   });
 
   it("translates page metadata without changing source entries", () => {

@@ -1,5 +1,5 @@
 import { filterEntriesByKind, getEntryBySlug, getLatestEntries, sortEntriesNewestFirst } from "./archive.js";
-import { entries, profile } from "./content.js";
+import { loadSiteContent } from "./content.js";
 import {
   dictionary,
   getInitialLanguage,
@@ -12,6 +12,8 @@ const app = document.querySelector("#app");
 let activeFilter = "All";
 let activeSlug = null;
 let language = getInitialLanguage();
+let profile = null;
+let entries = [];
 
 function t() {
   return dictionary[language];
@@ -49,6 +51,7 @@ function renderHeader() {
           )
           .join("")}
       </div>
+      <a class="admin-link" href="admin/">Admin</a>
     </header>
   `;
 }
@@ -230,50 +233,6 @@ function renderAbout() {
   `;
 }
 
-function renderOwnerGuide() {
-  const copy = t();
-  const steps = [
-    [copy.ownerStep1Title, copy.ownerStep1Body],
-    [copy.ownerStep2Title, copy.ownerStep2Body],
-    [copy.ownerStep3Title, copy.ownerStep3Body],
-    [copy.ownerUpgradeTitle, copy.ownerUpgradeBody]
-  ]
-    .map(
-      ([title, body], index) => `
-        <li>
-          <span>${String(index + 1).padStart(2, "0")}</span>
-          <div>
-            <h3>${title}</h3>
-            <p>${body}</p>
-          </div>
-        </li>
-      `
-    )
-    .join("");
-
-  return `
-    <section class="section owner-section" id="owner" aria-labelledby="owner-heading">
-      <div class="section-heading">
-        <p>${copy.owner}</p>
-        <h2 id="owner-heading">${copy.ownerTitle}</h2>
-      </div>
-      <p>${copy.ownerBody}</p>
-      <ol class="owner-steps">${steps}</ol>
-      <pre class="content-template"><code>{
-  date: "2026.06.11",
-  type: "Note",
-  title: "Your new title",
-  medium: "Writing",
-  tags: ["tag-one", "tag-two"],
-  slug: "your-new-title",
-  excerpt: "Short summary shown in lists.",
-  image: "assets/your-image.jpg",
-  body: ["First paragraph.", "Second paragraph."]
-}</code></pre>
-    </section>
-  `;
-}
-
 function renderEntryPage(entry) {
   const copy = t();
   const image = entry.image ? `<img alt="" src="${entry.image}" />` : "";
@@ -303,7 +262,6 @@ function renderHome() {
     ${renderWorks()}
     ${renderNotes()}
     ${renderAbout()}
-    ${renderOwnerGuide()}
   `;
 }
 
@@ -353,5 +311,9 @@ const hashSlug = window.location.hash.startsWith("#entry-")
   ? window.location.hash.replace("#entry-", "")
   : null;
 
-activeSlug = hashSlug && getEntryBySlug(entries, hashSlug) ? hashSlug : null;
-render();
+loadSiteContent().then((content) => {
+  profile = content.profile;
+  entries = content.entries;
+  activeSlug = hashSlug && getEntryBySlug(entries, hashSlug) ? hashSlug : null;
+  render();
+});

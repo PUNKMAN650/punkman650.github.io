@@ -92,3 +92,19 @@ export const entries = [
     ]
   }
 ];
+
+export async function loadSiteContent() {
+  try {
+    const response = await fetch("content/site.json", { cache: "no-store" });
+    if (!response.ok) {
+      throw new Error(`Content request failed: ${response.status}`);
+    }
+    const payload = await response.json();
+    return {
+      profile: payload.profile ?? profile,
+      entries: Array.isArray(payload.entries) ? payload.entries : entries
+    };
+  } catch {
+    return { profile, entries };
+  }
+}

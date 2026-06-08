@@ -5,8 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "node scripts/dev-server.mjs",
-    "build": "node scripts/build.mjs",
+    "build": "node --check src/app.js && node --check admin/admin.js && node --check scripts/dev-server.mjs && node scripts/build.mjs",
     "preview": "node scripts/dev-server.mjs dist",
-    "test": "node --test src/archive.test.mjs src/i18n.test.mjs"
+    "test": "node --test src/archive.test.mjs src/i18n.test.mjs src/content-json.test.mjs"
   }
 }

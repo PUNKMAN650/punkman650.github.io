@@ -37,13 +37,15 @@ const server = createServer(async (request, response) => {
 
   try {
     const info = await stat(filePath);
-    if (!info.isFile()) {
+    const targetPath = info.isDirectory() ? join(filePath, "index.html") : filePath;
+    const targetInfo = await stat(targetPath);
+    if (!targetInfo.isFile()) {
       throw new Error("Not a file");
     }
     response.writeHead(200, {
-      "Content-Type": types[extname(filePath)] ?? "application/octet-stream"
+      "Content-Type": types[extname(targetPath)] ?? "application/octet-stream"
     });
-    createReadStream(filePath).pipe(response);
+    createReadStream(targetPath).pipe(response);
   } catch {
     response.writeHead(404);
     response.end("Not found");

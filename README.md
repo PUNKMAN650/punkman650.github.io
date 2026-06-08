@@ -53,17 +53,18 @@ The language toggle changes page chrome such as navigation, headings, table labe
 
 ## Owner Editing
 
-This is a public static site, so it intentionally does not include a public upload editor. Only the GitHub account with write access to this private repository can edit the site safely.
+Open `/admin/` on the deployed site to edit content through the private admin interface.
 
-To replace sample content:
+The admin page can:
 
-1. Open `src/content.js`.
-2. Add, edit, or delete objects in the `entries` array.
-3. Upload personal images into `assets/`.
-4. Reference the image with a path such as `assets/window-study-01.jpg`.
-5. Commit the change to `main`; GitHub Pages will redeploy.
+- Load the current `content/site.json` from GitHub
+- Add, edit, and delete entries
+- Upload images to `assets/uploads/`
+- Save the updated content back to the `main` branch
 
-If direct editing inside the website is required, add an authenticated admin system later, such as Decap CMS with GitHub login or a Supabase-backed admin page.
+Only a GitHub token with write access to `PUNKMAN650/personal_website` can save changes. Visitors can open the admin page, but they cannot change the site without repository write permission.
+
+For a fine-grained GitHub token, grant this repository `Contents: Read and write`.
 
 ## Deployment
 

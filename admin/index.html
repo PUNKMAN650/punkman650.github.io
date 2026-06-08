@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin / ESTWEN BRENCH</title>
+    <link rel="stylesheet" href="admin.css" />
+  </head>
+  <body>
+    <main class="admin-shell">
+      <header class="admin-header">
+        <div>
+          <p>Private Admin</p>
+          <h1>ESTWEN BRENCH / Visual Notes</h1>
+        </div>
+        <a href="../">View site</a>
+      </header>
+
+      <section class="auth-panel" id="auth-panel">
+        <h2>登录编辑</h2>
+        <p>输入你的 GitHub fine-grained token。只有对 <code>PUNKMAN650/personal_website</code> 有写入权限的 token 才能保存。Token 权限只需要给这个仓库开启 <code>Contents: Read and write</code>。</p>
+        <label>
+          GitHub Token
+          <input id="token" type="password" autocomplete="off" placeholder="github_pat_..." />
+        </label>
+        <div class="actions">
+          <button id="load-content" type="button">加载内容</button>
+          <button id="forget-token" type="button" class="secondary">清除本机 token</button>
+        </div>
+        <p class="hint">Token 只保存在你当前浏览器里，不会写进网站代码。不要在公共电脑上使用。</p>
+      </section>
+
+      <section class="editor-panel" id="editor-panel" hidden>
+        <div class="editor-toolbar">
+          <div>
+            <p>Content Editor</p>
+            <h2>编辑作品、文字和照片</h2>
+          </div>
+          <div class="actions">
+            <button id="add-entry" type="button">新增条目</button>
+            <button id="save-content" type="button">保存到 GitHub</button>
+          </div>
+        </div>
+
+        <section class="profile-grid">
+          <label>
+            网站标题
+            <input id="profile-name" />
+          </label>
+          <label>
+            短标题
+            <input id="profile-short-name" />
+          </label>
+          <label>
+            年份
+            <input id="profile-year" />
+          </label>
+          <label>
+            状态
+            <input id="profile-location" />
+          </label>
+        </section>
+
+        <section>
+          <h3>内容条目</h3>
+          <div id="entries-editor" class="entries-editor"></div>
+        </section>
+      </section>
+
+      <div class="status" id="status" role="status"></div>
+    </main>
+    <script type="module" src="admin.js"></script>
+  </body>
+</html>
