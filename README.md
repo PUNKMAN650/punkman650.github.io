@@ -62,7 +62,7 @@ The admin page can:
 - Upload images to `assets/uploads/`
 - Save the updated content back to the `main` branch
 
-Only a GitHub token with write access to `PUNKMAN650/personal_website` can save changes. Visitors can open the admin page, but they cannot change the site without repository write permission.
+Only a GitHub token with write access to `PUNKMAN650/punkman650.github.io` can save changes. Visitors can open the admin page, but they cannot change the site without repository write permission.
 
 For a fine-grained GitHub token, grant this repository `Contents: Read and write`.
 

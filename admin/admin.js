@@ -1,4 +1,4 @@
-const repo = "PUNKMAN650/personal_website";
+const repo = "PUNKMAN650/punkman650.github.io";
 const branch = "main";
 const contentPath = "content/site.json";
 const uploadDir = "assets/uploads";
