@@ -8,9 +8,7 @@ An editorial personal creator website for images, writing, and project fragments
 
 - Static HTML, CSS, and JavaScript
 - Node.js built-in test runner
-- Static deployment on Vercel
-
-The original design spec targets React/Vite for a later dependency-backed version. This implementation avoids third-party packages so the site can be built and verified in the current restricted network environment.
+- GitHub Pages user site: `PUNKMAN650/punkman650.github.io`
 
 ## Local Development
 
@@ -29,7 +27,7 @@ npm run build
 
 ## Content
 
-Entry metadata lives in `src/content.js`.
+Editable site content lives in `content/site.json`.
 
 Each entry includes:
 
@@ -43,13 +41,11 @@ Each entry includes:
 - optional `image`
 - `body`
 
-Profile and social links live in `src/content.js`.
-
 ## Language Toggle
 
 The public interface supports English and Chinese through `src/i18n.js`.
 
-The language toggle changes page chrome such as navigation, headings, table labels, buttons, and owner instructions. Personal entry content such as titles, body text, image files, and tags stays exactly as written in `src/content.js`.
+The language toggle changes page chrome such as navigation, headings, table labels, and buttons. Personal entry content such as titles, body text, image files, and tags stays exactly as written in `content/site.json`.
 
 ## Owner Editing
 
@@ -68,8 +64,9 @@ For a fine-grained GitHub token, grant this repository `Contents: Read and write
 
 ## Deployment
 
-The project is configured for Vercel static hosting:
+This repository follows GitHub Pages' user-site convention:
 
-- Build command: `npm run build`
-- Output directory: `.`
-- Install command: `npm install --ignore-scripts`
+- Repository: `PUNKMAN650/punkman650.github.io`
+- Published URL: `https://punkman650.github.io/`
+
+The included GitHub Actions workflow verifies and deploys the static site.
