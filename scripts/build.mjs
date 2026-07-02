@@ -14,6 +14,7 @@ const requiredFiles = [
   "src/archive.js",
   "src/content.js",
   "src/i18n.js",
+  "src/markdown.js",
   "src/styles.css"
 ];
 

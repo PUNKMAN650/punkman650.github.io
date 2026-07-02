@@ -398,6 +398,63 @@ img {
   margin: 0 0 24px;
 }
 
+.markdown-body h1,
+.markdown-body h2,
+.markdown-body h3 {
+  margin: 42px 0 16px;
+  font-family: Georgia, "Times New Roman", serif;
+  font-weight: 400;
+  line-height: 1.1;
+}
+
+.markdown-body h1 {
+  font-size: 44px;
+}
+
+.markdown-body h2 {
+  font-size: 34px;
+}
+
+.markdown-body h3 {
+  font-size: 26px;
+}
+
+.markdown-body a {
+  color: var(--accent);
+  text-decoration: none;
+  border-bottom: 1px solid currentColor;
+}
+
+.markdown-body ul,
+.markdown-body ol {
+  margin: 0 0 26px;
+  padding-left: 22px;
+}
+
+.markdown-body li {
+  margin-bottom: 10px;
+}
+
+.markdown-body blockquote {
+  margin: 34px 0;
+  padding-left: 22px;
+  border-left: 1px solid var(--ink);
+  color: var(--muted);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 25px;
+  line-height: 1.45;
+}
+
+.markdown-body figure {
+  margin: 42px 0;
+}
+
+.markdown-body img {
+  width: 100%;
+  margin: 18px 0 32px;
+  filter: grayscale(1);
+}
+
 @keyframes fade-up {
   from {
     opacity: 0;

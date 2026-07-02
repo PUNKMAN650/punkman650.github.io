@@ -10,8 +10,7 @@ export const profile = {
     { labelKey: "navIndex", href: "#index" },
     { labelKey: "navWorks", href: "#works" },
     { labelKey: "navNotes", href: "#notes" },
-    { labelKey: "navAbout", href: "#about" },
-    { labelKey: "navOwner", href: "#owner" }
+    { labelKey: "navAbout", href: "#about" }
   ],
   social: [
     { label: "Instagram", href: "https://instagram.com/" },

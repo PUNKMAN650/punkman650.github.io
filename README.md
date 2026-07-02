@@ -56,9 +56,12 @@ The admin page can:
 - Load the current `content/site.json` from GitHub
 - Add, edit, and delete entries
 - Upload images to `assets/uploads/`
+- Insert uploaded images into Markdown body content
+- Import `.md` files into the editor
+- Preview Markdown before saving
 - Save the updated content back to the `main` branch
 
-Only a GitHub token with write access to `PUNKMAN650/punkman650.github.io` can save changes. Visitors can open the admin page, but they cannot change the site without repository write permission.
+Only a GitHub token with write access to `PUNKMAN650/punkman650.github.io` can enter the editor and save changes. Visitors can open the admin URL, but they only see the login panel and cannot load the editor, upload assets, or change the site without repository write permission.
 
 For a fine-grained GitHub token, grant this repository `Contents: Read and write`.
 

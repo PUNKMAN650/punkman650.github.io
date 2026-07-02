@@ -7,6 +7,7 @@ import {
   translateEntryType,
   translateMedium
 } from "./i18n.js";
+import { entryToMarkdown, renderMarkdown } from "./markdown.js";
 
 const app = document.querySelector("#app");
 let activeFilter = "All";
@@ -236,7 +237,7 @@ function renderAbout() {
 function renderEntryPage(entry) {
   const copy = t();
   const image = entry.image ? `<img alt="" src="${entry.image}" />` : "";
-  const body = entry.body.map((paragraph) => `<p>${escapeHtml(paragraph)}</p>`).join("");
+  const body = renderMarkdown(entryToMarkdown(entry));
 
   return `
     ${renderHeader()}
@@ -248,7 +249,7 @@ function renderEntryPage(entry) {
         ${entry.excerpt ? `<p>${escapeHtml(entry.excerpt)}</p>` : ""}
       </header>
       ${image}
-      <div class="entry-body">${body}</div>
+      <div class="entry-body markdown-body">${body}</div>
     </article>
   `;
 }

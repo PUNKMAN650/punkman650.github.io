@@ -57,6 +57,21 @@ function slugify(value) {
     .replace(/^-+|-+$/g, "");
 }
 
+function escapeHtml(value) {
+  return String(value)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;");
+}
+
+function escapeAttr(value) {
+  return escapeHtml(value).replaceAll('"', "&quot;");
+}
+
+function option(value, selected) {
+  return `<option value="${value}" ${value === selected ? "selected" : ""}>${value}</option>`;
+}
+
 async function githubJson(url, options = {}) {
   const response = await fetch(url, {
     ...options,
@@ -79,7 +94,16 @@ async function loadContent() {
     return;
   }
 
-  setStatus("正在从 GitHub 加载内容...");
+  setStatus("正在验证写入权限...");
+  const repoInfo = await githubJson(apiBase);
+  const canWrite =
+    repoInfo.permissions?.push || repoInfo.permissions?.admin || repoInfo.permissions?.maintain;
+  if (!canWrite) {
+    setStatus("这个 token 没有仓库写入权限，不能进入编辑器。请使用你的站主 token。");
+    return;
+  }
+
+  setStatus("权限通过，正在加载内容...");
   const payload = await githubJson(`${apiBase}/contents/${contentPath}?ref=${branch}`);
   contentSha = payload.sha;
   siteContent = JSON.parse(decodeBase64(payload.content));
@@ -87,7 +111,7 @@ async function loadContent() {
   renderEditor();
   authPanel.hidden = true;
   editorPanel.hidden = false;
-  setStatus("内容已加载，可以编辑。");
+  setStatus("已进入编辑器。没有仓库写权限的人无法加载、上传或保存。");
 }
 
 function profileInput(id) {
@@ -102,11 +126,22 @@ function renderEditor() {
 
   entriesEditor.innerHTML = siteContent.entries.map(renderEntryForm).join("");
   bindEntryEvents();
+  refreshAllPreviews();
+}
+
+function entryMarkdown(entry) {
+  if (entry.bodyMarkdown) {
+    return entry.bodyMarkdown;
+  }
+  if (Array.isArray(entry.body)) {
+    return entry.body.join("\n\n");
+  }
+  return "";
 }
 
 function renderEntryForm(entry, index) {
-  const body = Array.isArray(entry.body) ? entry.body.join("\n\n") : "";
   const tags = Array.isArray(entry.tags) ? entry.tags.join(", ") : "";
+  const markdown = entryMarkdown(entry);
   const imageSrc = entry.image?.startsWith("http") ? entry.image : `../${entry.image}`;
   const imagePreview = entry.image ? `<img class="image-preview" alt="" src="${imageSrc}" />` : "";
 
@@ -115,7 +150,7 @@ function renderEntryForm(entry, index) {
       <summary>${entry.date || "New date"} / ${entry.title || "Untitled"}</summary>
       <div class="entry-fields">
         <label>日期
-          <input data-field="date" value="${escapeAttr(entry.date ?? "")}" placeholder="2026.06.11" />
+          <input data-field="date" value="${escapeAttr(entry.date ?? "")}" placeholder="2026.07.02" />
         </label>
         <label>类型
           <select data-field="type">
@@ -144,38 +179,70 @@ function renderEntryForm(entry, index) {
         <label class="full">摘要
           <textarea data-field="excerpt">${escapeHtml(entry.excerpt ?? "")}</textarea>
         </label>
-        <label class="full">正文段落，用空行分段
-          <textarea data-field="body">${escapeHtml(body)}</textarea>
-        </label>
-        <label class="full">图片路径
+        <label class="full">封面 / 列表图片路径
           <input data-field="image" value="${escapeAttr(entry.image ?? "")}" placeholder="assets/uploads/photo.jpg" />
           ${imagePreview}
         </label>
-        <label class="full">上传图片
-          <input type="file" accept="image/*" data-upload />
-        </label>
       </div>
+
+      <div class="composer-layout">
+        <section>
+          <div class="composer-toolbar">
+            <button type="button" data-generate-slug>用标题生成 slug</button>
+            <button type="button" data-insert-heading>插入小标题</button>
+            <button type="button" data-insert-quote>插入引用</button>
+          </div>
+          <label class="full">Markdown 正文
+            <textarea class="markdown-editor" data-field="bodyMarkdown" placeholder="可以直接写 Markdown。支持标题、段落、列表、引用、链接和图片。">${escapeHtml(markdown)}</textarea>
+          </label>
+          <div class="upload-row">
+            <label>上传图片并插入正文
+              <input type="file" accept="image/*" data-upload-inline />
+            </label>
+            <label>导入 .md 文件
+              <input type="file" accept=".md,text/markdown,text/plain" data-import-md />
+            </label>
+          </div>
+        </section>
+        <section class="preview-pane">
+          <p>Preview</p>
+          <div class="markdown-preview" data-preview></div>
+        </section>
+      </div>
+
       <div class="entry-actions">
-        <button type="button" data-generate-slug>用标题生成 slug</button>
         <button type="button" class="danger" data-delete>删除这个条目</button>
       </div>
     </details>
   `;
 }
 
-function option(value, selected) {
-  return `<option value="${value}" ${value === selected ? "selected" : ""}>${value}</option>`;
+function renderPreviewMarkdown(markdown) {
+  return String(markdown)
+    .split(/\n{2,}/)
+    .map((block) => block.trim())
+    .filter(Boolean)
+    .map((block) => {
+      if (block.startsWith("### ")) return `<h3>${escapeHtml(block.slice(4))}</h3>`;
+      if (block.startsWith("## ")) return `<h2>${escapeHtml(block.slice(3))}</h2>`;
+      if (block.startsWith("# ")) return `<h1>${escapeHtml(block.slice(2))}</h1>`;
+      if (block.startsWith("> ")) return `<blockquote>${escapeHtml(block.replace(/^> /gm, ""))}</blockquote>`;
+      if (block.startsWith("![")) {
+        const match = block.match(/^!\[([^\]]*)\]\(([^)]+)\)$/);
+        if (match) return `<figure><img alt="${escapeAttr(match[1])}" src="../${escapeAttr(match[2])}" /></figure>`;
+      }
+      return `<p>${escapeHtml(block).replace(/\n/g, "<br />")}</p>`;
+    })
+    .join("");
 }
 
-function escapeHtml(value) {
-  return String(value)
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;");
+function refreshPreview(card) {
+  const markdown = card.querySelector('[data-field="bodyMarkdown"]').value;
+  card.querySelector("[data-preview]").innerHTML = renderPreviewMarkdown(markdown);
 }
 
-function escapeAttr(value) {
-  return escapeHtml(value).replaceAll('"', "&quot;");
+function refreshAllPreviews() {
+  document.querySelectorAll(".entry-card").forEach(refreshPreview);
 }
 
 function readEditor() {
@@ -186,6 +253,7 @@ function readEditor() {
 
   siteContent.entries = Array.from(document.querySelectorAll(".entry-card")).map((card) => {
     const read = (field) => card.querySelector(`[data-field="${field}"]`)?.value.trim() ?? "";
+    const markdown = read("bodyMarkdown");
     return {
       date: read("date"),
       type: read("type"),
@@ -195,12 +263,26 @@ function readEditor() {
       slug: read("slug") || slugify(read("title")),
       excerpt: read("excerpt"),
       image: read("image") || undefined,
-      body: read("body").split(/\n\s*\n/).map((paragraph) => paragraph.trim()).filter(Boolean)
+      bodyMarkdown: markdown,
+      body: markdown.split(/\n\s*\n/).map((paragraph) => paragraph.trim()).filter(Boolean)
     };
   });
 }
 
+function insertAtCursor(textarea, value) {
+  const start = textarea.selectionStart ?? textarea.value.length;
+  const end = textarea.selectionEnd ?? textarea.value.length;
+  textarea.value = `${textarea.value.slice(0, start)}${value}${textarea.value.slice(end)}`;
+  textarea.focus();
+  textarea.selectionStart = textarea.selectionEnd = start + value.length;
+  refreshPreview(textarea.closest(".entry-card"));
+}
+
 function bindEntryEvents() {
+  document.querySelectorAll(".markdown-editor").forEach((textarea) => {
+    textarea.addEventListener("input", () => refreshPreview(textarea.closest(".entry-card")));
+  });
+
   document.querySelectorAll("[data-delete]").forEach((button) => {
     button.addEventListener("click", () => {
       const card = button.closest(".entry-card");
@@ -219,22 +301,69 @@ function bindEntryEvents() {
     });
   });
 
-  document.querySelectorAll("[data-upload]").forEach((input) => {
+  document.querySelectorAll("[data-insert-heading]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const textarea = button.closest(".entry-card").querySelector('[data-field="bodyMarkdown"]');
+      insertAtCursor(textarea, "\n\n## 小标题\n\n");
+    });
+  });
+
+  document.querySelectorAll("[data-insert-quote]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const textarea = button.closest(".entry-card").querySelector('[data-field="bodyMarkdown"]');
+      insertAtCursor(textarea, "\n\n> 引用文字\n\n");
+    });
+  });
+
+  document.querySelectorAll("[data-upload-inline]").forEach((input) => {
     input.addEventListener("change", async () => {
       const file = input.files?.[0];
-      if (!file) {
-        return;
-      }
+      if (!file) return;
       const card = input.closest(".entry-card");
       try {
         const path = await uploadImage(file);
-        card.querySelector('[data-field="image"]').value = path;
-        setStatus(`图片已上传：${path}`);
+        card.querySelector('[data-field="image"]').value ||= path;
+        const textarea = card.querySelector('[data-field="bodyMarkdown"]');
+        insertAtCursor(textarea, `\n\n![${file.name}](${path})\n\n`);
+        setStatus(`图片已上传并插入正文：${path}`);
       } catch (error) {
         setStatus(`上传失败：${error.message}`);
       }
     });
   });
+
+  document.querySelectorAll("[data-import-md]").forEach((input) => {
+    input.addEventListener("change", async () => {
+      const file = input.files?.[0];
+      if (!file) return;
+      const card = input.closest(".entry-card");
+      const text = await file.text();
+      const parsed = parseMarkdownFile(text, file.name);
+      card.querySelector('[data-field="title"]').value = parsed.title;
+      card.querySelector('[data-field="slug"]').value = parsed.slug;
+      card.querySelector('[data-field="excerpt"]').value = parsed.excerpt;
+      card.querySelector('[data-field="bodyMarkdown"]').value = parsed.markdown;
+      refreshPreview(card);
+      setStatus(`已导入 Markdown 文件：${file.name}`);
+    });
+  });
+}
+
+function parseMarkdownFile(markdown, fileName) {
+  const titleMatch = markdown.match(/^#\s+(.+)$/m);
+  const title = titleMatch?.[1]?.trim() || fileName.replace(/\.[^.]+$/, "");
+  const plain = markdown
+    .replace(/^#+\s+/gm, "")
+    .replace(/!\[[^\]]*\]\([^)]+\)/g, "")
+    .replace(/\[[^\]]+\]\([^)]+\)/g, "")
+    .trim();
+  const excerpt = plain.split(/\n+/).find(Boolean)?.slice(0, 160) ?? "";
+  return {
+    title,
+    slug: slugify(title),
+    excerpt,
+    markdown
+  };
 }
 
 async function uploadImage(file) {
@@ -297,7 +426,8 @@ function addEntry() {
     tags: [],
     slug: "new-entry",
     excerpt: "",
-    body: ["New paragraph."]
+    bodyMarkdown: "# New entry\n\nWrite here.",
+    body: ["Write here."]
   });
   renderEditor();
 }
